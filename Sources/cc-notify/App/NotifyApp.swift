@@ -8,32 +8,35 @@ enum NotifyApp {
         let notificationView = NotificationView(style: style, message: message)
         let viewSize = notificationView.fittingSize
 
-        fputs("[cc-notify] View size: \(viewSize)\n", stderr)
-
         let window = OverlayWindow(contentRect: NSRect(origin: .zero, size: viewSize))
         window.contentView = notificationView
-        window.positionInBottomRight()
 
-        // Start fully visible (no animation for now, let's just confirm it shows)
+        // Position off-screen (below bottom), fully opaque
+        window.positionInBottomRight()
+        let finalOrigin = window.frame.origin
+        let startOrigin = NSPoint(x: finalOrigin.x, y: finalOrigin.y - window.frame.height - 80)
+        window.setFrameOrigin(startOrigin)
         window.alphaValue = 1.0
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()
         app.activate(ignoringOtherApps: true)
 
-        fputs("[cc-notify] Window frame: \(window.frame)\n", stderr)
-        fputs("[cc-notify] Window visible: \(window.isVisible)\n", stderr)
-        fputs("[cc-notify] App active: \(app.isActive)\n", stderr)
+        // Run animation
+        let animationController = AnimationController(window: window, notificationView: notificationView, finalOrigin: finalOrigin)
+        var shouldTerminate = false
 
-        // NO dock icon hiding for now — keep .regular
-
-        // Hold for 5 seconds then exit
+        // Let the window render one frame
         let runLoop = RunLoop.current
-        let deadline = Date(timeIntervalSinceNow: 5.0)
-        while Date() < deadline {
+        runLoop.run(mode: .default, before: Date(timeIntervalSinceNow: 0.05))
+
+        animationController.runFullSequence {
+            shouldTerminate = true
+        }
+
+        while !shouldTerminate {
             runLoop.run(mode: .default, before: Date(timeIntervalSinceNow: 0.016))
         }
 
-        fputs("[cc-notify] Done, closing\n", stderr)
         window.close()
     }
 }

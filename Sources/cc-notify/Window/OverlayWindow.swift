@@ -27,7 +27,6 @@ final class OverlayWindow: NSWindow {
         let padding: CGFloat = 32
         let windowSize = self.frame.size
 
-        // Ensure we stay fully within the visible frame
         let x = visibleFrame.maxX - windowSize.width - padding
         let y = visibleFrame.minY + padding
 
