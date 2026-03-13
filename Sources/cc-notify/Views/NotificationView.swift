@@ -4,8 +4,8 @@ final class NotificationView: NSView {
     let clawdView: ClawdView
     let speechBubbleView: SpeechBubbleView
 
-    private let spacing: CGFloat = 0
-    private let margin: CGFloat = 16  // extra margin so shadows aren't clipped
+    private let spacing: CGFloat = 2
+    private let margin: CGFloat = 16
 
     init(style: NotificationStyle, message: String) {
         self.clawdView = ClawdView()
@@ -31,18 +31,20 @@ final class NotificationView: NSView {
         let bubbleSize = speechBubbleView.intrinsicContentSize
         let clawdSize = clawdView.intrinsicContentSize
 
-        // Speech bubble at top, centered horizontally with margin
+        // Center Clawd horizontally, bubble centered above
+        let totalWidth = max(bubbleSize.width, clawdSize.width)
+        let bubbleX = margin + (totalWidth - bubbleSize.width) / 2
+        let clawdX = margin + (totalWidth - clawdSize.width) / 2
+
         speechBubbleView.frame = NSRect(
-            x: margin,
+            x: bubbleX,
             y: margin,
             width: bubbleSize.width,
             height: bubbleSize.height
         )
 
-        // Clawd below the bubble, right-aligned (under the pointer)
-        let clawdX = margin + bubbleSize.width - clawdSize.width - 14
         clawdView.frame = NSRect(
-            x: max(clawdX, margin),
+            x: clawdX,
             y: margin + bubbleSize.height + spacing,
             width: clawdSize.width,
             height: clawdSize.height
